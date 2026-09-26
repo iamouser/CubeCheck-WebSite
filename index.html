@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090d" />
+  <meta name="description" content="CubeCheck — open-source проверка компьютера на известные признаки читов Minecraft для Windows, Linux и macOS." />
+  <title>CubeCheck — Minecraft Check Utility</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23101017'/%3E%3Cpath d='M17 18h30v8H25v12h22v8H17z' fill='%239b87ff'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg:#07070a;
+      --bg-2:#0d0d13;
+      --panel:rgba(20,20,30,.62);
+      --panel-2:rgba(28,28,42,.7);
+      --line:rgba(255,255,255,.11);
+      --text:#f5f5fb;
+      --muted:#aaaac1;
+      --muted-2:#77778f;
+      --accent:#9a87ff;
+      --accent-2:#6f5bd6;
+      --warm:#f2c94c;
+      --green:#76e6a2;
+      --shadow:0 24px 70px rgba(0,0,0,.38);
+      --radius:24px;
+      --nav-w:290px;
+      --footer-h:44px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:36px}
+    body{
+      margin:0;color:var(--text);background:
+      radial-gradient(900px 560px at 12% 8%,rgba(111,91,214,.16),transparent 62%),
+      radial-gradient(720px 520px at 90% 12%,rgba(104,69,255,.11),transparent 62%),
+      radial-gradient(760px 520px at 52% 88%,rgba(58,45,122,.12),transparent 65%),
+      var(--bg);
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      overflow-x:hidden;opacity:0;transform:translateY(8px);transition:opacity .38s ease,transform .38s ease;
+    }
+    body.page-ready{opacity:1;transform:none}
+    body.page-out{opacity:0;transform:translateY(8px)}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 82%)}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+    .noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.025;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E")}
+    .topbar{position:fixed;top:18px;left:18px;right:18px;z-index:50;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+    .topbar>*{pointer-events:auto}
+    .menu-btn,.mini-btn{height:46px;border:1px solid var(--line);background:rgba(16,16,23,.68);color:#fff;border-radius:15px;backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);box-shadow:0 14px 40px rgba(0,0,0,.24);cursor:pointer;transition:.28s ease}
+    .menu-btn{width:46px;display:grid;place-items:center}
+    .menu-btn:hover,.mini-btn:hover{border-color:rgba(154,135,255,.55);transform:translateY(-1px);background:rgba(28,26,42,.85)}
+    .menu-lines{width:19px;height:14px;position:relative}.menu-lines i{position:absolute;left:0;width:100%;height:1.5px;border-radius:2px;background:#fff;transition:.3s}.menu-lines i:nth-child(1){top:0}.menu-lines i:nth-child(2){top:6px}.menu-lines i:nth-child(3){top:12px}
+    body.nav-open .menu-lines i:nth-child(1){transform:translateY(6px) rotate(45deg)}body.nav-open .menu-lines i:nth-child(2){opacity:0}body.nav-open .menu-lines i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+    .top-actions{display:flex;gap:10px}.mini-btn{padding:0 16px;font-size:13px;color:#d7d7e5}.mini-btn.icon-only{width:46px;padding:0;display:grid;place-items:center}.mini-btn.icon-only svg{width:22px;height:22px;display:block}.mini-btn.icon-only svg path{stroke:currentColor}.mini-btn.icon-only.github svg{width:21px;height:21px;fill:currentColor}.mini-btn.icon-only.download svg{width:22px;height:22px;fill:none}
+
+
+    .language-switcher{position:relative;z-index:70}.lang-trigger{height:46px;min-width:84px;padding:0 12px;border:1px solid var(--line);background:rgba(16,16,23,.68);color:#fff;border-radius:15px;backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);box-shadow:0 14px 40px rgba(0,0,0,.24);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.28s ease}.lang-trigger:hover,.language-switcher.open .lang-trigger{border-color:rgba(154,135,255,.55);background:rgba(28,26,42,.9);transform:translateY(-1px)}.lang-trigger .globe{width:18px;height:18px;flex:0 0 18px;stroke:currentColor}.lang-current{font-size:12px;font-weight:800;letter-spacing:.08em}.lang-chevron{width:13px;height:13px;stroke:currentColor;transition:transform .28s cubic-bezier(.2,.8,.2,1)}.language-switcher.open .lang-chevron{transform:rotate(180deg)}.lang-menu{position:absolute;right:0;top:calc(100% + 10px);width:190px;padding:7px;border:1px solid var(--line);border-radius:16px;background:rgba(16,16,24,.96);backdrop-filter:blur(26px) saturate(145%);-webkit-backdrop-filter:blur(26px) saturate(145%);box-shadow:0 22px 60px rgba(0,0,0,.48);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px) scale(.98);transform-origin:top right;transition:opacity .22s ease,transform .22s cubic-bezier(.2,.8,.2,1),visibility .22s}.language-switcher.open .lang-menu{opacity:1;visibility:visible;pointer-events:auto;transform:none}.lang-option{width:100%;min-height:46px;border:0;border-radius:11px;background:transparent;color:#e8e8f2;padding:0 10px;display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:9px;text-align:left;cursor:pointer;transition:background .2s ease,color .2s ease,transform .2s ease}.lang-option:hover{background:rgba(255,255,255,.06)}.lang-option.active{background:rgba(154,135,255,.12);color:#fff}.lang-option .lang-code{font-size:10px;color:var(--muted-2);letter-spacing:.08em}.lang-option .lang-check{opacity:0;color:var(--accent);transform:scale(.7);transition:.2s}.lang-option.active .lang-check{opacity:1;transform:scale(1)}body::after{content:"";position:fixed;inset:0;z-index:180;pointer-events:none;background:rgba(7,7,10,.34);opacity:0;transition:opacity .13s ease}body.lang-changing::after{opacity:1}
+    .side-nav{position:fixed;z-index:45;top:76px;left:18px;bottom:calc(var(--footer-h) + 18px);width:76px;border:1px solid var(--line);border-radius:22px;background:rgba(13,13,19,.7);backdrop-filter:blur(28px) saturate(145%);-webkit-backdrop-filter:blur(28px) saturate(145%);box-shadow:var(--shadow);overflow:hidden;transition:width .38s cubic-bezier(.2,.8,.2,1),background .3s}
+    body.nav-open .side-nav{width:var(--nav-w);background:rgba(13,13,20,.86)}
+    .brand{height:74px;display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);white-space:nowrap}
+    .brand-mark{flex:0 0 38px;width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,rgba(154,135,255,.95),rgba(96,72,210,.7));position:relative;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 10px 24px rgba(92,69,210,.28)}
+    .brand-mark:before{content:"";position:absolute;inset:9px 8px;border:3px solid white;border-right-color:transparent;border-radius:5px}
+    .brand-copy{opacity:0;transform:translateX(-8px);transition:.25s}.brand-copy b{display:block;font-size:16px}.brand-copy span{font-size:11px;color:var(--muted)}body.nav-open .brand-copy{opacity:1;transform:none}
+    .nav-list{padding:12px 10px;display:grid;gap:7px}
+    .nav-link{height:48px;border-radius:14px;display:flex;align-items:center;gap:15px;padding:0 15px;color:#8f8fa4;white-space:nowrap;transition:.24s;border:1px solid transparent}
+    .nav-link svg{width:22px;height:22px;flex:0 0 22px;stroke:currentColor}.nav-link span{opacity:0;transform:translateX(-7px);transition:.24s}.nav-link:hover{color:#fff;background:rgba(255,255,255,.05)}.nav-link.active{color:#fff;background:linear-gradient(90deg,rgba(154,135,255,.24),rgba(154,135,255,.09));border-color:rgba(154,135,255,.25)}.nav-link.active svg{color:var(--accent)}body.nav-open .nav-link span{opacity:1;transform:none}
+    .nav-meta{position:absolute;left:10px;right:10px;bottom:12px;padding:13px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;color:var(--muted-2);font-size:11px}.nav-meta .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:10px;box-shadow:0 0 14px rgba(118,230,162,.55)}.nav-meta span:last-child{opacity:0;transition:.25s}body.nav-open .nav-meta span:last-child{opacity:1}
+
+    main{position:relative;z-index:2;padding:0 26px calc(var(--footer-h) + 34px) 122px;transition:padding-left .38s cubic-bezier(.2,.8,.2,1)}body.nav-open main{padding-left:336px}
+    .section{min-height:100vh;display:flex;align-items:center;padding:86px 0 54px;position:relative}
+    .section-inner{width:min(1240px,100%);margin:auto}
+    .eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid rgba(154,135,255,.24);border-radius:999px;background:rgba(154,135,255,.07);font-size:12px;color:#cfc7ff;text-transform:uppercase;letter-spacing:.12em}
+    .eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px rgba(154,135,255,.75)}
+    h1,h2,h3,p{margin-top:0}h1{font-size:clamp(48px,7.8vw,112px);line-height:.92;letter-spacing:-.055em;margin:24px 0 24px;max-width:1000px}h2{font-size:clamp(34px,5vw,64px);letter-spacing:-.04em;line-height:1;margin-bottom:18px}h3{letter-spacing:-.02em}
+    .gradient-text{background:linear-gradient(110deg,#fff 15%,#d3cbff 52%,#9580ff 92%);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lead{font-size:clamp(17px,2vw,22px);line-height:1.6;color:var(--muted);max-width:780px}
+    .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.82fr);gap:44px;align-items:center}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}.hero-actions .btn{min-width:170px;height:58px;padding:0 24px;border-radius:18px;font-size:16px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:50px;padding:0 20px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.045);color:#f6f6fb;font-weight:650;cursor:pointer;transition:.25s;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+    .btn:hover{transform:translateY(-2px);border-color:rgba(154,135,255,.46);background:rgba(154,135,255,.09)}.btn.primary{background:linear-gradient(135deg,#a18cff,#6f5bd6);border-color:rgba(255,255,255,.18);box-shadow:0 14px 36px rgba(96,72,210,.3)}.btn.primary:hover{box-shadow:0 18px 42px rgba(96,72,210,.42)}.btn.warm{background:rgba(242,201,76,.09);border-color:rgba(242,201,76,.25);color:#ffe89a}
+    .hero-visual{position:relative}.app-frame{border-radius:28px;border:1px solid rgba(255,255,255,.13);padding:10px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,255,255,.025));box-shadow:0 38px 100px rgba(0,0,0,.55);transform:perspective(1000px) rotateY(-5deg) rotateX(2deg);transition:.5s}.app-frame:hover{transform:perspective(1000px) rotateY(-1deg) rotateX(0deg) translateY(-4px)}.app-frame img{display:block;width:100%;border-radius:19px}.float-chip{position:absolute;padding:10px 13px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(15,15,23,.68);backdrop-filter:blur(20px);font-size:12px;color:#d7d7e6;box-shadow:0 14px 30px rgba(0,0,0,.3)}.chip-a{left:-22px;bottom:12%}.chip-b{right:-15px;top:10%}.float-chip b{color:#fff}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:34px;max-width:700px}.stat{padding:17px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}.stat strong{display:block;font-size:20px}.stat span{color:var(--muted);font-size:12px}
+
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:30px}.section-head p{max-width:620px;color:var(--muted);line-height:1.6;margin:0}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.glass-card{position:relative;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(155deg,rgba(255,255,255,.075),rgba(255,255,255,.022));padding:24px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);transition:.28s}.glass-card:hover{transform:translateY(-4px);border-color:rgba(154,135,255,.28);background:linear-gradient(155deg,rgba(154,135,255,.09),rgba(255,255,255,.025))}.card-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:rgba(154,135,255,.12);color:#c9bfff;border:1px solid rgba(154,135,255,.18);margin-bottom:22px}.glass-card h3{font-size:19px;margin-bottom:10px}.glass-card p{color:var(--muted);line-height:1.6;font-size:14px;margin-bottom:0}.glass-card .num{position:absolute;right:18px;top:15px;font-size:11px;color:var(--muted-2);letter-spacing:.12em}
+    .notice{margin-top:16px;display:flex;gap:14px;padding:18px 20px;border:1px solid rgba(242,201,76,.2);border-radius:18px;background:rgba(242,201,76,.055);color:#d8d3bd;font-size:14px;line-height:1.55}.notice b{color:#ffe694}.notice svg{flex:0 0 20px;margin-top:1px;color:var(--warm)}
+
+    .download-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:16px}.repo-card{min-height:100%;display:flex;flex-direction:column}.repo-top{display:flex;align-items:center;gap:13px;margin-bottom:22px}.repo-mark{width:46px;height:46px;border-radius:15px;background:#fff;color:#09090c;display:grid;place-items:center}.repo-title b{display:block;font-size:18px}.repo-title span{font-size:12px;color:var(--muted)}.repo-tree{margin:14px 0 24px;padding:17px;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.22);font:13px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d7d7e8;overflow:auto;white-space:pre-wrap}.repo-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:auto;padding-top:8px}.repo-links .btn{flex:1 1 160px;min-width:145px;height:54px}
+    .version-picker{margin:0 0 16px;padding:18px 20px;border:1px solid rgba(154,135,255,.18);border-radius:18px;background:rgba(154,135,255,.045)}.version-picker h3{margin:0 0 6px;font-size:20px}.version-picker p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}.os-list{display:grid;gap:16px}.os-card{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:18px 18px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.028);transition:.25s}.os-card:hover{background:rgba(255,255,255,.045);border-color:rgba(154,135,255,.28)}.os-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:800}.os-card h3{margin:0 0 4px;font-size:16px}.os-card p{margin:0;color:var(--muted);font-size:12px}.os-actions{display:flex;gap:8px}.os-actions .btn{height:40px;padding:0 14px;font-size:12px}.requirement{margin-top:12px;padding:18px 20px;border-radius:18px;border:1px solid rgba(154,135,255,.22);background:rgba(154,135,255,.055);display:flex;align-items:center;justify-content:space-between;gap:20px}.requirement p{margin:0;color:#c9c5dc;font-size:13px;line-height:1.5}.requirement p b{color:#fff}.discords{display:flex;gap:8px;flex-wrap:wrap}
+
+    .feature-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.feature-grid .glass-card:nth-child(1){grid-column:span 7;min-height:260px}.feature-grid .glass-card:nth-child(2){grid-column:span 5}.feature-grid .glass-card:nth-child(3),.feature-grid .glass-card:nth-child(4),.feature-grid .glass-card:nth-child(5){grid-column:span 4}.big-symbol{position:absolute;right:22px;bottom:4px;font-size:110px;font-weight:900;letter-spacing:-.08em;color:rgba(154,135,255,.06);user-select:none}.feature-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}.feature-item{font-size:13px;color:#cbc9d8;display:flex;gap:9px;align-items:center}.check{width:18px;height:18px;border-radius:6px;background:rgba(118,230,162,.1);color:var(--green);display:grid;place-items:center;font-size:11px;flex:0 0 18px}
+
+    .gallery-shell{position:relative}.gallery{display:grid;grid-auto-flow:column;grid-auto-columns:min(76vw,780px);gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 2px 18px;scrollbar-width:thin;scrollbar-color:#4e456f transparent}.shot{scroll-snap-align:center;border:1px solid var(--line);border-radius:22px;padding:8px;background:rgba(255,255,255,.04);cursor:zoom-in;transition:.3s;min-height:280px;display:flex;align-items:center}.shot:hover{transform:translateY(-4px);border-color:rgba(154,135,255,.34)}.shot img{width:100%;max-height:560px;object-fit:contain;border-radius:15px;display:block}.gallery-hint{color:var(--muted-2);font-size:12px;margin-top:5px}
+
+    .safe-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.faq{display:grid;gap:10px}.faq details{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.028);padding:0 18px;overflow:hidden;transition:border-color .25s ease,background .25s ease}.faq details[open]{border-color:rgba(154,135,255,.25);background:rgba(154,135,255,.05)}.faq summary{cursor:pointer;list-style:none;padding:17px 34px 17px 0;font-weight:650;position:relative}.faq summary::-webkit-details-marker{display:none}.faq summary:after{content:"+";position:absolute;right:0;color:var(--accent);font-size:22px;top:12px;transition:transform .25s ease}.faq details[open] summary:after{content:"–"}.faq .answer{display:grid;grid-template-rows:0fr;transition:grid-template-rows .34s ease,opacity .3s ease;opacity:.75}.faq details[open] .answer{grid-template-rows:1fr;opacity:1}.faq .answer-inner{overflow:hidden}.faq p{color:var(--muted);line-height:1.6;font-size:13px;padding:0 0 17px;margin:0}.safe-card .badge{display:inline-flex;gap:7px;align-items:center;margin-bottom:16px;padding:7px 10px;border-radius:999px;background:rgba(118,230,162,.08);border:1px solid rgba(118,230,162,.18);color:#adf4c8;font-size:11px}.safe-card ul{padding-left:18px;color:var(--muted);line-height:1.7;font-size:13px;margin-bottom:18px}.safe-card code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(255,255,255,.06);border:1px solid var(--line);padding:2px 6px;border-radius:6px;color:#ddd8ff}.safe-note{margin-top:18px;padding:16px 18px;border:1px solid rgba(154,135,255,.16);border-radius:16px;background:rgba(154,135,255,.06);color:#d9d5eb;font-size:13px;line-height:1.65}.safe-note b{color:#fff}.safe-card .repo-links{margin-top:22px}.faq>.repo-links{margin-top:8px}
+
+    .fixed-footer{position:fixed;left:112px;right:18px;bottom:12px;height:var(--footer-h);z-index:40;border:1px solid var(--line);border-radius:15px;background:rgba(12,12,17,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:flex;align-items:center;justify-content:center;gap:11px;color:#74748d;font-size:11px;transition:left .38s;box-shadow:0 10px 30px rgba(0,0,0,.25)}body.nav-open .fixed-footer{left:330px}.fixed-footer a:hover{color:#d8d3ff}.sep{opacity:.45}
+
+    .modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;padding:28px;background:rgba(0,0,0,.62);backdrop-filter:blur(14px)}.modal.open{display:grid}.modal-card{width:min(860px,100%);border:1px solid rgba(255,255,255,.13);border-radius:24px;background:rgba(18,18,27,.94);box-shadow:0 30px 100px rgba(0,0,0,.65);overflow:hidden;animation:pop .25s ease}@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px;border-bottom:1px solid var(--line)}.modal-head h3{margin:0}.close{width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#fff;cursor:pointer}.modal-body{padding:26px}.modal-body p{color:var(--muted);line-height:1.6;font-size:14px}.join-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;margin:22px 0 14px}.join-box{padding:18px 18px 20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);transition:.25s ease;display:flex;flex-direction:column;min-height:152px}.join-box.visited{border-color:rgba(118,230,162,.34);background:rgba(118,230,162,.06)}.join-box b{display:block;margin-bottom:6px}.join-box span{font-size:12px;color:var(--muted);line-height:1.5}.join-box .btn{width:100%;margin-top:auto;height:42px}.join-status{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}.status-pill{padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;color:var(--muted)}.status-pill.done{border-color:rgba(118,230,162,.35);background:rgba(118,230,162,.08);color:#dff9ea}.confirm-row{display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:15px;background:rgba(154,135,255,.06);border:1px solid rgba(154,135,255,.17);font-size:13px;color:#c8c4d8;margin-bottom:6px}.confirm-row input{margin-top:2px;accent-color:var(--accent)}.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;margin-top:24px}.source-card{padding:22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);display:flex;flex-direction:column;min-height:178px}.source-card h4{margin:0 0 8px}.source-card p{margin:0 0 16px;font-size:12px;line-height:1.55}.source-card .btn{width:100%;height:48px;margin-top:auto}.modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:26px}.disabled{opacity:.42;pointer-events:none}
+    .lightbox{position:fixed;inset:0;z-index:110;display:none;place-items:center;background:rgba(0,0,0,.86);padding:28px;cursor:zoom-out}.lightbox.open{display:grid}.lightbox img{max-width:min(94vw,1600px);max-height:90vh;border-radius:18px;border:1px solid rgba(255,255,255,.15);box-shadow:0 30px 100px #000}
+
+    .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}.reveal.visible{opacity:1;transform:none}
+    @media (max-width:1000px){.hero-grid,.download-layout,.safe-grid{grid-template-columns:1fr}.hero-visual{max-width:780px}.cards{grid-template-columns:1fr 1fr}.feature-grid .glass-card{grid-column:span 6!important}.feature-grid .glass-card:nth-child(1){grid-column:span 12!important}.chip-a{left:6px}.chip-b{right:6px}}
+    @media (max-width:760px){:root{--footer-h:54px}.topbar{top:10px;left:10px;right:10px}.side-nav{left:10px;top:66px;bottom:76px;width:0;border-width:0}body.nav-open .side-nav{width:calc(100vw - 20px);border-width:1px}.brand{padding:0 18px}.nav-link span,.brand-copy,.nav-meta span:last-child{opacity:1!important;transform:none!important}.side-nav .nav-link{padding:0 15px}main,body.nav-open main{padding-left:18px;padding-right:18px}.section{padding-top:88px;min-height:auto;padding-bottom:90px}.section:first-of-type{min-height:100vh}.hero-grid{gap:34px}.app-frame{transform:none}.float-chip{display:none}.stats{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.cards{grid-template-columns:1fr}.feature-grid{display:grid;grid-template-columns:1fr}.feature-grid .glass-card{grid-column:auto!important}.feature-list{grid-template-columns:1fr}.os-card{grid-template-columns:auto 1fr}.os-actions{grid-column:1/-1}.os-actions .btn{flex:1}.requirement{align-items:flex-start;flex-direction:column}.gallery{grid-auto-columns:90vw}.join-grid,.source-grid{grid-template-columns:1fr;gap:16px}.modal{padding:14px}.modal-body{padding:18px}.fixed-footer,body.nav-open .fixed-footer{left:10px;right:10px;bottom:10px;padding:0 10px;flex-wrap:wrap;gap:5px;line-height:1.1;text-align:center}.top-actions .mini-btn:first-child{display:none}h1{font-size:clamp(50px,15vw,78px)}}
+    @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Открыть навигацию"><span class="menu-lines"><i></i><i></i><i></i></span></button>
+  <div class="top-actions">
+    <div class="language-switcher" aria-label="Язык">
+      <button class="lang-trigger" type="button" aria-label="Выбрать язык" aria-haspopup="menu" aria-expanded="false">
+        <svg class="globe" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.45 3.6 5.45 3.6 9S14.4 18.55 12 21M12 3C9.6 5.45 8.4 8.45 8.4 12S9.6 18.55 12 21"/></svg>
+        <span class="lang-current">RU</span>
+        <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg>
+      </button>
+      <div class="lang-menu" role="menu">
+        <button class="lang-option" type="button" data-lang="ru" role="menuitemradio" aria-checked="true"><span>Русский</span><span class="lang-code">RU</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" type="button" data-lang="en" role="menuitemradio" aria-checked="false"><span>Английский</span><span class="lang-code">EN</span><span class="lang-check">✓</span></button>
+      </div>
+    </div>
+    <a class="mini-btn icon-only github" href="https://github.com/iamouser/CubeCheck" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.649.5.5 5.649.5 12c0 5.084 3.292 9.4 7.86 10.922.575.106.785-.25.785-.555 0-.274-.01-1-.016-1.963-3.197.695-3.872-1.54-3.872-1.54-.523-1.327-1.277-1.68-1.277-1.68-1.043-.713.08-.699.08-.699 1.153.081 1.76 1.184 1.76 1.184 1.024 1.755 2.687 1.248 3.342.954.104-.742.401-1.248.729-1.535-2.553-.29-5.238-1.277-5.238-5.684 0-1.255.448-2.282 1.183-3.087-.119-.29-.513-1.457.112-3.038 0 0 .965-.309 3.162 1.18a10.97 10.97 0 0 1 5.758 0c2.195-1.489 3.158-1.18 3.158-1.18.627 1.581.233 2.748.115 3.038.737.805 1.18 1.832 1.18 3.087 0 4.418-2.689 5.39-5.252 5.674.412.355.779 1.055.779 2.126 0 1.536-.014 2.775-.014 3.153 0 .308.207.667.79.554C20.213 21.396 23.5 17.081 23.5 12 23.5 5.649 18.351.5 12 .5Z"/></svg>
+    </a>
+    <button class="mini-btn icon-only download" data-download="Windows" aria-label="Скачать" title="Скачать">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3.5v10.2m0 0 4-4m-4 4-4-4M4.75 15.75v2.75A1.75 1.75 0 0 0 6.5 20.25h11a1.75 1.75 0 0 0 1.75-1.75v-2.75"/></svg>
+    </button>
+  </div>
+</div>
+
+<aside class="side-nav" aria-label="Навигация">
+  <div class="brand"><span class="brand-mark"></span><div class="brand-copy"><b>CubeCheck</b><span>Minecraft check utility</span></div></div>
+  <nav class="nav-list">
+    <a class="nav-link active" href="#intro" data-section="intro" title="Ознакомление"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg><span>Ознакомление</span></a>
+    <a class="nav-link" href="#download" data-section="download" title="Скачать"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"/></svg><span>Скачать / GitHub</span></a>
+    <a class="nav-link" href="#features" data-section="features" title="Возможности"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg><span>Возможности</span></a>
+    <a class="nav-link" href="#interface" data-section="interface" title="Интерфейс"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4zM4 9h16"/><path d="M7 7h.01M10 7h.01"/></svg><span>Интерфейс</span></a>
+    <a class="nav-link" href="#safety" data-section="safety" title="Безопасность"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 4.6-2.7 8-7 10-4.3-2-7-5.4-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Безопасность и FAQ</span></a>
+  </nav>
+  <div class="nav-meta"><span class="dot"></span><span>Open source · MIT License</span></div>
+</aside>
+
+<main>
+  <section class="section" id="intro">
+    <div class="section-inner hero-grid">
+      <div class="reveal">
+        <span class="eyebrow"><i></i> Windows · Linux · macOS</span>
+        <h1><span class="gradient-text">CubeCheck.</span><br>Проверка быстрее.</h1>
+        <p class="lead">Инструмент для администраторов Minecraft‑проектов, который помогает быстрее проверить компьютер игрока на известные признаки стороннего ПО — без десятка разрозненных действий вручную.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#download">Скачать CubeCheck <span>↓</span></a>
+          <a class="btn" href="https://github.com/iamouser/CubeCheck" target="_blank" rel="noopener">Исходный код ↗</a>
+          <a class="btn warm" href="https://discord.gg/JXRGnkqP35" target="_blank" rel="noopener">Discord поддержки</a>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong>3 ОС</strong><span>Windows, Linux, macOS</span></div>
+          <div class="stat"><strong>MIT</strong><span>Открытый исходный код</span></div>
+          <div class="stat"><strong>1 отчёт</strong><span>Результаты проверки в YAML</span></div>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <div class="app-frame"><img src="assets/screens/screen-3.webp" alt="Интерфейс CubeCheck — список утилит" /></div>
+        <div class="float-chip chip-a"><b>Автопроверка</b><br>процессы · файлы · логи</div>
+        <div class="float-chip chip-b"><b>Open source</b><br>GitHub + MIT</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="download">
+    <div class="section-inner">
+      <div class="section-head reveal"><div><span class="eyebrow"><i></i> Download</span><h2>Скачать без путаницы.</h2></div><p>Выберите свою систему. Онлайн‑установщик загружает payload с GitHub, офлайн‑вариант рассчитан на установку без загрузки payload во время запуска.</p></div>
+      <div class="download-layout">
+        <article class="glass-card repo-card reveal">
+          <div class="repo-top"><div class="repo-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .7a11.5 11.5 0 0 0-3.64 22.4c.58.1.78-.25.78-.55v-2.23c-3.2.7-3.87-1.35-3.87-1.35-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.47.11-3.06 0 0 .97-.31 3.16 1.18a10.98 10.98 0 0 1 5.75 0c2.19-1.49 3.15-1.18 3.15-1.18.63 1.59.23 2.76.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .3.2.66.79.55A11.5 11.5 0 0 0 12 .7Z"/></svg></div><div class="repo-title"><b>iamouser/CubeCheck</b><span>Public repository · MIT</span></div></div>
+          <pre class="repo-tree"><code>Repository/
+├── src/         — Core & API
+├── crates/      — Universal launcher
+├── assets/      — Resources & configuration
+├── scripts/     — Build scripts
+├── ui/          — Rust / egui interface
+├── build.bat    — Windows build
+├── build.sh     — Linux / macOS build
+├── README.md    — Documentation
+└── LICENSE.md   — MIT License</code></pre>
+          <p>Исходный код проекта открыт. Сторонние утилиты имеют собственные лицензии и не становятся частью MIT‑лицензии CubeCheck.</p>
+          <div class="repo-links"><a class="btn" href="https://github.com/iamouser/CubeCheck" target="_blank" rel="noopener">Repository ↗</a><a class="btn" href="https://github.com/iamouser/CubeCheck/blob/main/README.md" target="_blank" rel="noopener">README ↗</a><a class="btn" href="https://github.com/jumpworlds/CubeCheck-payload" target="_blank" rel="noopener">Payload ↗</a></div>
+        </article>
+
+        <div class="reveal">
+          <div class="version-picker"><h3>Выберите версию CubeCheck</h3><p>Сначала выберите свою операционную систему, затем вариант установки: <b>Online</b> или <b>Offline</b>.</p></div>
+          <div class="os-list">
+            <article class="os-card"><div class="os-icon">⊞</div><div><h3>Windows</h3><p>Windows 10/11 x64 · setup.exe · Online / Offline</p></div><div class="os-actions"><button class="btn primary" data-download="Windows">Online</button><button class="btn" data-download="Windows Offline">Offline</button></div></article>
+            <article class="os-card"><div class="os-icon">⌁</div><div><h3>Linux</h3><p>.run installer · Online / Offline</p></div><div class="os-actions"><button class="btn primary" data-download="Linux">Online</button><button class="btn" data-download="Linux Offline">Offline</button></div></article>
+            <article class="os-card"><div class="os-icon">⌘</div><div><h3>macOS</h3><p>.run installer · Online / Offline · README при необходимости</p></div><div class="os-actions"><button class="btn primary" data-download="macOS">Online</button><button class="btn" data-download="macOS Offline">Offline</button></div></article>
+          </div>
+          <div class="requirement"><p><b>Перед скачиванием:</b> вступите в Discord AuraStudio и AnProject. Сайт попросит подтвердить это перед загрузкой.</p><div class="discords"><a class="btn" href="https://discord.gg/JXRGnkqP35" target="_blank" rel="noopener">AuraStudio ↗</a><a class="btn" href="https://discord.gg/azcMMqzWxu" target="_blank" rel="noopener">AnProject ↗</a></div></div>
+          <div class="notice"><svg viewBox="0 0 24 24" fill="none"><path stroke="currentColor" d="M12 3 2 20h20L12 3Zm0 6v5m0 3h.01"/></svg><div><b>Скачивайте только с официального GitHub.</b> Не принимайте «CubeCheck» в личных сообщениях от неизвестных людей. Для проверки лучше использовать ссылку на официальный Releases.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-inner">
+      <div class="section-head reveal"><div><span class="eyebrow"><i></i> Capabilities</span><h2>Всё для одной проверки.</h2></div><p>CubeCheck объединяет типичные действия администратора в одном интерфейсе и оставляет понятный результат проверки.</p></div>
+      <div class="feature-grid">
+        <article class="glass-card reveal"><span class="num">01</span><div class="card-icon">⌕</div><h3>Автопроверка</h3><p>Проверка процессов, файлов на рабочем столе и в загрузках, каталога <code>.minecraft</code>, автозагрузки и логов Minecraft.</p><div class="feature-list"><div class="feature-item"><span class="check">✓</span>Файлы и названия</div><div class="feature-item"><span class="check">✓</span>Запущенные процессы</div><div class="feature-item"><span class="check">✓</span>Автозагрузка</div><div class="feature-item"><span class="check">✓</span>Логи Minecraft</div></div><span class="big-symbol">01</span></article>
+        <article class="glass-card reveal"><span class="num">02</span><div class="card-icon">↗</div><h3>Нужные утилиты</h3><p>Everything, Shellbag Analyzer, System Informer, Process Monitor, Autoruns и Process Explorer на Windows; системные аналоги — на Linux и macOS.</p></article>
+        <article class="glass-card reveal"><span class="num">03</span><div class="card-icon">▤</div><h3>Отчёт</h3><p>Результаты проверки можно сохранить в YAML, чтобы не переписывать найденные пути вручную.</p></article>
+        <article class="glass-card reveal"><span class="num">04</span><div class="card-icon">◐</div><h3>Настройки</h3><p>Темы, подсветка, интенсивность, масштаб и автосохранение настроек.</p></article>
+        <article class="glass-card reveal"><span class="num">05</span><div class="card-icon">◫</div><h3>Установщик</h3><p>Отдельный мастер установки с выбором ярлыков, папки, online/offline‑вариантом и удалением.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="interface">
+    <div class="section-inner">
+      <div class="section-head reveal"><div><span class="eyebrow"><i></i> Interface</span><h2>Интерфейс CubeCheck.</h2></div><p>Тёмный интерфейс, отдельные разделы проверки и компонентов, понятный установщик и минимум лишних действий.</p></div>
+      <div class="gallery-shell reveal"><div class="gallery" id="gallery">
+        <figure class="shot"><img src="assets/screens/screen-1.webp" alt="Лицензия в установщике CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-2.webp" alt="Завершение установки CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-3.webp" alt="Раздел утилит CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-4.webp" alt="Автопроверка CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-5.webp" alt="Сохранение отчёта CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-6.webp" alt="Компоненты CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-7.webp" alt="Настройки CubeCheck"></figure>
+        <figure class="shot"><img src="assets/screens/screen-8.webp" alt="Информация о CubeCheck"></figure>
+      </div><div class="gallery-hint">Прокрутите горизонтально · Нажмите на скриншот, чтобы открыть крупнее</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="safety">
+    <div class="section-inner">
+      <div class="section-head reveal"><div><span class="eyebrow"><i></i> Safety & Support</span><h2>Проверка — по согласию.</h2></div><p>CubeCheck — инструмент, а не повод передавать кому‑либо полный контроль над компьютером. Проверяющий должен объяснить, что запускается и зачем.</p></div>
+      <div class="safe-grid">
+        <article class="glass-card safe-card reveal"><span class="badge">● Безопасная практика</span><h3>Что важно перед проверкой</h3><ul><li>Скачивайте CubeCheck только из официального репозитория и Releases.</li><li>Перед запуском проверки пользователь должен понимать, какие каталоги и системные сведения будут просматриваться.</li><li>Не отправляйте пароли, токены, приватные ключи или другие секреты в отчётах и поддержку.</li><li>После проверки программу можно удалить стандартным способом, предусмотренным проектом.</li><li>Код CubeCheck опубликован под MIT; лицензии сторонних утилит действуют отдельно.</li></ul><div class="safe-note"><b>Коротко:</b> CubeCheck создан, чтобы ускорить проверку, а не давать кому-либо скрытый доступ к вашему ПК. Если что-то непонятно — сначала спросите проверяющего, что именно будет открываться и зачем.</div><div class="repo-links"><a class="btn" href="privacy.html">Privacy</a><a class="btn" href="terms.html">Terms & Licenses</a></div></article>
+        <div class="faq reveal">
+          <details open><summary>CubeCheck сам удаляет или изменяет файлы?</summary><div class="answer"><div class="answer-inner"><p>Основная задача программы — проверка и запуск утилит. В интерфейсе есть отдельная функция очистки логов Minecraft, поэтому используйте её только осознанно. Остальные действия лучше выполнять вручную после проверки найденного.</p></div></div></details>
+          <details><summary>Почему CubeCheck безопасен?</summary><div class="answer"><div class="answer-inner"><p>Исходный код CubeCheck открыт и доступен на GitHub: можно посмотреть, какие действия выполняет программа. Для безопасности скачивайте сборки только из официального репозитория и Releases, а перед запуском проверяйте источник файла.</p></div></div></details>
+          <details><summary>Нужна ли установка?</summary><div class="answer"><div class="answer-inner"><p>Для Windows предусмотрен WPF‑setup. В проекте также есть universal/portable сценарии; конкретный набор зависит от релиза и ОС.</p></div></div></details>
+          <details><summary>Где получить помощь?</summary><div class="answer"><div class="answer-inner"><p>Поддержка доступна в Discord AuraStudio и Telegram AuraStudio. По проблемам с релизом или исходным кодом также можно использовать GitHub.</p></div></div></details>
+          <details><summary>Сайт собирает мои данные?</summary><div class="answer"><div class="answer-inner"><p>Эта версия сайта не содержит форм, собственного трекинга или аналитики и не сохраняет персональные данные. Внешние сервисы GitHub, Discord и Telegram работают по своим правилам.</p></div></div></details>
+          <div class="repo-links"><a class="btn primary" href="https://discord.gg/JXRGnkqP35" target="_blank" rel="noopener">Discord поддержки ↗</a><a class="btn" href="https://t.me/aurastud?direct" target="_blank" rel="noopener">Telegram ↗</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="fixed-footer">
+  <span>CubeCheck</span><span class="sep">|</span><a href="https://t.me/cubecheck" target="_blank" rel="noopener">@cubecheck</a><span class="sep">|</span><span>Авторы:</span><a href="https://discord.gg/JXRGnkqP35" target="_blank" rel="noopener">AuraStudio</a><a href="https://discord.gg/azcMMqzWxu" target="_blank" rel="noopener">AnProject</a>
+</footer>
+
+<div class="modal" id="downloadModal" role="dialog" aria-modal="true" aria-labelledby="downloadTitle">
+  <div class="modal-card">
+    <div class="modal-head"><h3 id="downloadTitle">Скачать CubeCheck</h3><button class="close" data-close aria-label="Закрыть">×</button></div>
+    <div class="modal-body">
+      <p id="downloadText">Перед скачиванием откройте оба Discord‑сервера проекта. На этой статичной версии сайта проверяется открытие обеих ссылок и ваше подтверждение.</p>
+      <div class="join-grid">
+        <div class="join-box" id="joinAuraBox"><b>AuraStudio</b><span>Основной Discord сервера студии</span><a class="btn" id="joinAura" href="https://discord.gg/JXRGnkqP35" target="_blank" rel="noopener">Открыть Discord ↗</a></div>
+        <div class="join-box" id="joinAnBox"><b>AnProject</b><span>Discord соавтора проекта</span><a class="btn" id="joinAn" href="https://discord.gg/azcMMqzWxu" target="_blank" rel="noopener">Открыть Discord ↗</a></div>
+      </div>
+      <div class="join-status"><span class="status-pill" id="auraStatus">AuraStudio: не открыто</span><span class="status-pill" id="anStatus">AnProject: не открыто</span></div>
+      <label class="confirm-row"><input type="checkbox" id="joinConfirm" /><span>Я открыл(а) оба Discord‑сервера и хочу перейти к официальной загрузке CubeCheck.</span></label>
+      <div class="source-grid">
+        <div class="source-card"><h4>Скачать с сайта</h4><p>Прямая ссылка на файл релиза без перехода на список релизов.</p><a id="directBtn" class="btn primary disabled" href="#" target="_blank" rel="noopener">Прямая загрузка ↗</a></div>
+        <div class="source-card"><h4>Скачать с GitHub</h4><p>Открывает официальный GitHub Releases с выбранной версией.</p><a id="releaseBtn" class="btn disabled" href="https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta" target="_blank" rel="noopener">Открыть Releases ↗</a></div>
+      </div>
+      <div class="modal-actions"><button class="btn" data-close>Отмена</button></div>
+    </div>
+  </div>
+</div>
+<div class="lightbox" id="lightbox"><img alt="Скриншот CubeCheck крупным планом" /></div>
+
+<script src="i18n.js"></script>
+<script>
+  const body = document.body;
+  const menuBtn = document.getElementById('menuBtn');
+  menuBtn.addEventListener('click',()=>body.classList.toggle('nav-open'));
+
+  const sections = [...document.querySelectorAll('section[id]')];
+  const navLinks = [...document.querySelectorAll('.nav-link')];
+  const activeObs = new IntersectionObserver(entries=>{
+    const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(!visible) return;
+    navLinks.forEach(a=>a.classList.toggle('active',a.dataset.section===visible.target.id));
+  },{rootMargin:'-35% 0px -50% 0px',threshold:[0,.2,.5]});
+  sections.forEach(s=>activeObs.observe(s));
+  navLinks.forEach(a=>a.addEventListener('click',()=>{if(innerWidth<760) body.classList.remove('nav-open')}));
+
+  const revealObs = new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target)}}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+
+  const modal = document.getElementById('downloadModal');
+  const confirm = document.getElementById('joinConfirm');
+  const releaseBtn = document.getElementById('releaseBtn');
+  const directBtn = document.getElementById('directBtn');
+  const title = document.getElementById('downloadTitle');
+  const auraLink = document.getElementById('joinAura');
+  const anLink = document.getElementById('joinAn');
+  const auraStatus = document.getElementById('auraStatus');
+  const anStatus = document.getElementById('anStatus');
+  const auraBox = document.getElementById('joinAuraBox');
+  const anBox = document.getElementById('joinAnBox');
+  const routes = document.querySelectorAll('a[href="privacy.html"],a[href="terms.html"],a[href="index.html"]');
+  const downloadLinks = {
+    'Windows': { direct:'https://github.com/iamouser/CubeCheck/releases/download/v1.0.1-beta/CubeCheck-1.1.0-beta-universal-windows-setup.exe', release:'https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta' },
+    'Windows Offline': { direct:'https://github.com/iamouser/CubeCheck/releases/download/v1.0.1-beta/CubeCheck-1.1.0-beta-universal-windows-offline-setup.exe', release:'https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta' },
+    'Linux': { direct:'https://github.com/iamouser/CubeCheck/releases/download/v1.0.1-beta/CubeCheck-1.1.0-beta-universal-linux-setup.run', release:'https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta' },
+    'Linux Offline': { direct:'https://github.com/iamouser/CubeCheck/releases/download/v1.0.1-beta/CubeCheck-1.1.0-beta-universal-linux-offline-setup.run', release:'https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta' },
+    'macOS': { direct:'https://github.com/iamouser/CubeCheck/releases/download/v1.0.1-beta/CubeCheck-1.1.0-beta-universal-macos-setup.run', release:'https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta' },
+    'macOS Offline': { direct:'https://github.com/iamouser/CubeCheck/releases/download/v1.0.1-beta/CubeCheck-1.1.0-beta-universal-macos-offline-setup.run', release:'https://github.com/iamouser/CubeCheck/releases/tag/v1.0.1-beta' }
+  };
+  let currentDownload = 'Windows';
+  let openedAura = false;
+  let openedAn = false;
+
+  function updateDownloadState(){
+    const ready = openedAura && openedAn && confirm.checked;
+    [releaseBtn, directBtn].forEach(btn=>btn.classList.toggle('disabled', !ready));
+    const tr = window.CubeI18n?.t || (x=>x);
+    auraStatus.textContent = openedAura ? tr('AuraStudio: открыто') : tr('AuraStudio: не открыто');
+    anStatus.textContent = openedAn ? tr('AnProject: открыто') : tr('AnProject: не открыто');
+    auraStatus.classList.toggle('done', openedAura);
+    anStatus.classList.toggle('done', openedAn);
+    auraBox.classList.toggle('visited', openedAura);
+    anBox.classList.toggle('visited', openedAn);
+  }
+
+  function openModal(downloadKey){
+    currentDownload = downloadKey;
+    const tr = window.CubeI18n?.t || (x=>x);
+    const optionName = window.CubeI18n?.optionName ? window.CubeI18n.optionName(downloadKey) : downloadKey;
+    title.textContent = tr('Скачать CubeCheck') + ' · ' + optionName;
+    const linkSet = downloadLinks[downloadKey] || downloadLinks['Windows'];
+    directBtn.href = linkSet.direct;
+    releaseBtn.href = linkSet.release;
+    confirm.checked = false;
+    openedAura = false;
+    openedAn = false;
+    updateDownloadState();
+    modal.classList.add('open');
+  }
+
+  document.querySelectorAll('[data-download]').forEach(btn=>btn.addEventListener('click',()=>openModal(btn.dataset.download)));
+  confirm.addEventListener('change', updateDownloadState);
+  auraLink.addEventListener('click', ()=>{openedAura = true; updateDownloadState();});
+  anLink.addEventListener('click', ()=>{openedAn = true; updateDownloadState();});
+  document.addEventListener('cubecheck:languagechange',()=>{
+    updateDownloadState();
+    if(modal.classList.contains('open')){
+      const tr = window.CubeI18n?.t || (x=>x);
+      const optionName = window.CubeI18n?.optionName ? window.CubeI18n.optionName(currentDownload) : currentDownload;
+      title.textContent = tr('Скачать CubeCheck') + ' · ' + optionName;
+    }
+  });
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>modal.classList.remove('open')));
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});
+  addEventListener('keydown',e=>{if(e.key==='Escape'){modal.classList.remove('open');lightbox.classList.remove('open')}});
+
+  document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>body.classList.add('page-ready')));
+  routes.forEach(link=>link.addEventListener('click',e=>{
+    if(link.target === '_blank' || e.metaKey || e.ctrlKey) return;
+    e.preventDefault();
+    body.classList.remove('page-ready');
+    body.classList.add('page-out');
+    setTimeout(()=>location.href = link.href, 230);
+  }));
+
+  const lightbox = document.getElementById('lightbox');
+  const lightImg = lightbox.querySelector('img');
+  document.querySelectorAll('.shot img').forEach(img=>img.addEventListener('click',()=>{lightImg.src=img.src;lightImg.alt=img.alt;lightbox.classList.add('open')}));
+  lightbox.addEventListener('click',()=>lightbox.classList.remove('open'));
+</script>
+</body>
+</html>
